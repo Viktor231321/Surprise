@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<title>Вісник сезону II — таємниця загубленого листа</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Marck+Script&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --navy:#17243A; --night:#101827; --wine:#54283D; --silver:#C8CCD8; --champ:#D7BC83; --cream:#F6EBDD; --lilac:#A9A0C2; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; height:100%; background:#080c18; overflow:hidden; }
+  body { font-family:"Cormorant Garamond", Georgia, "Times New Roman", serif; font-weight:600; font-size:19px; color:var(--cream); -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  button { font:inherit; color:inherit; cursor:pointer; touch-action:manipulation; border:0; background:none; padding:0; }
+  h1, h2, h3 { margin:0; font-family:"Playfair Display", Georgia, serif; font-weight:700; line-height:1.15; }
+  p { margin:0; line-height:1.42; }
+
+  /* ---------- каркас сцен ---------- */
+  .scene { position:fixed; inset:0; display:none; overflow:hidden; background:#0b1222; transition:transform 1s ease-in; }
+  .scene.on { display:block; animation:scIn 2s cubic-bezier(.2,.7,.2,1) both; }
+  .scene.out { transform:scale(1.1); }
+  @keyframes scIn { from { opacity:0; transform:scale(1.06); } to { opacity:1; transform:none; } }
+  .bgl { position:absolute; inset:0; overflow:hidden; }
+  .scene.on .bgl { animation:kb 45s ease-in-out infinite alternate; }
+  @keyframes kb { to { transform:scale(1.07); } }
+  .sc { position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; display:flex;
+        padding:max(24px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(30px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left)); }
+  .wrap { margin:auto; width:min(100%,540px); display:flex; flex-direction:column; gap:16px; position:relative; }
+  #fade { position:fixed; inset:0; background:#04070f; opacity:0; pointer-events:none; z-index:90; transition:opacity .9s ease; }
+  #prog { position:fixed; top:max(8px,env(safe-area-inset-top)); left:50%; transform:translateX(-50%); width:min(66vw,300px); display:flex; gap:4px; z-index:60; pointer-events:none; }
+  #prog i { flex:1; height:2px; background:rgba(200,204,216,.25); transition:background .9s, box-shadow .9s; }
+  #prog i.on { background:var(--champ); box-shadow:0 0 8px rgba(215,188,131,.8); }
+  #mus { position:fixed; right:max(12px,env(safe-area-inset-right)); bottom:max(12px,env(safe-area-inset-bottom)); z-index:80; width:42px; height:42px; border-radius:50%;
+         background:rgba(16,24,39,.82); border:1px solid rgba(200,204,216,.5); color:var(--silver); font-size:18px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+  canvas#conf { position:fixed; inset:0; pointer-events:none; z-index:55; }
+
+  /* ---------- спільні елементи ---------- */
+  .kick { font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--silver); opacity:.9; }
+  .cap { font-style:italic; color:var(--lilac); font-size:17px; }
+  .hd { font-size:clamp(22px,6.4vw,30px); color:var(--cream); text-shadow:0 2px 22px rgba(0,0,0,.7); }
+  .hint { font-style:italic; font-size:17px; color:var(--silver); opacity:.92; }
+  .cta { position:relative; overflow:hidden; align-self:center; max-width:100%; text-align:center; line-height:1.3; border:1px solid rgba(200,204,216,.7); color:var(--cream); border-radius:999px; padding:14px 30px;
+         background:linear-gradient(90deg,rgba(200,204,216,.06),rgba(200,204,216,.2),rgba(200,204,216,.06)); background-color:rgba(10,16,30,.62); font-family:"Playfair Display", Georgia, serif; font-weight:500; font-size:13px; letter-spacing:.14em; text-transform:uppercase;
+         box-shadow:0 0 22px rgba(169,160,194,.28), inset 0 0 14px rgba(200,204,216,.12); transition:transform .2s; }
+  .cta::after { content:""; position:absolute; top:0; bottom:0; width:40%; left:-60%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.34),transparent); animation:sweep 3.6s ease-in-out infinite; }
+  @keyframes sweep { to { left:130%; } }
+  .cta:active { transform:scale(.96); }
+  .enter { animation:enter .9s cubic-bezier(.2,1,.4,1) both; }
+  @keyframes enter { from { opacity:0; transform:translateY(14px); } }
+
+  .stars i { position:absolute; width:2px; height:2px; border-radius:50%; background:#fff; animation:tw 3.4s ease-in-out infinite; }
+  @keyframes tw { 50% { opacity:.2; transform:scale(.55); } }
+  .moon { position:absolute; border-radius:50%; background:radial-gradient(circle at 38% 36%,#fffdf2 0,#f3ecd6 38%,#cfc6aa 72%,#a89f86 100%);
+          box-shadow:0 0 60px 20px rgba(220,230,255,.25), 0 0 170px 70px rgba(150,170,230,.2); }
+  .moon::before { content:""; position:absolute; inset:0; border-radius:50%;
+          background:radial-gradient(circle at 30% 40%,rgba(120,110,90,.26) 0 8%,transparent 9%), radial-gradient(circle at 62% 30%,rgba(120,110,90,.2) 0 6%,transparent 7%),
+                     radial-gradient(circle at 55% 68%,rgba(120,110,90,.22) 0 10%,transparent 11%), radial-gradient(circle at 25% 70%,rgba(120,110,90,.18) 0 5%,transparent 6%); }
+  .fog { position:absolute; left:-30%; width:160%; height:34%; background:radial-gradient(ellipse at 50% 50%,rgba(200,210,235,.16),transparent 68%); animation:fogd 22s ease-in-out infinite alternate; }
+  @keyframes fogd { to { transform:translateX(12%); } }
+  .trees { position:absolute; left:0; right:0; bottom:0; width:100%; height:24%; display:block; }
+  .petal { position:fixed; top:-30px; width:12px; height:16px; border-radius:70% 0 70% 0; background:linear-gradient(135deg,#ffffff,#d9d3e8); opacity:.7; pointer-events:none; z-index:54; animation:petal linear forwards; }
+  @keyframes petal { to { transform:translate(var(--sw),114vh) rotate(560deg); opacity:.2; } }
+  .sp { position:fixed; width:var(--s); height:var(--s); border-radius:50%; background:radial-gradient(circle,#fff,#C8CCD8 60%,rgba(200,204,216,0)); box-shadow:0 0 8px rgba(220,230,255,.9); pointer-events:none; z-index:70; transform:translate(-50%,-50%); animation:sp .9s ease-out forwards; }
+  @keyframes sp { to { transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))); opacity:0; } }
+  .shard { position:fixed; z-index:70; pointer-events:none; background:linear-gradient(135deg,#fff,#aeb4c8); clip-path:polygon(10% 0,100% 25%,80% 100%,0 70%); transform:translate(-50%,-50%); animation:shard 1.1s cubic-bezier(.3,.6,.6,1) forwards; }
+  @keyframes shard { to { transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--r)); opacity:0; } }
+
+  /* ---------- ЕТАП 1: лист опівночі ---------- */
+  #s0 .bgl { background:linear-gradient(#060a16 0%,#101827 36%,#1b2c4a 76%,#26354f 100%); }
+  #s0 .moon { right:7%; top:5%; width:clamp(110px,30vw,200px); aspect-ratio:1; }
+  #s0 .sc .wrap { align-items:flex-start; }
+  #t0s { font-size:15px; max-width:90%; }
+  .env { position:relative; width:min(320px,88%); aspect-ratio:3/2; align-self:center; margin:30px 0 14px; transform:rotate(-3deg); filter:drop-shadow(0 26px 30px rgba(0,0,0,.65)); transition:opacity .8s, transform .8s; }
+  .env svg { width:100%; height:100%; overflow:visible; display:block; }
+  .fF { transform-box:fill-box; transform-origin:50% 0; transition:transform .45s ease-in; }
+  .fB { transform-box:fill-box; transform-origin:50% 100%; transform:scaleY(0); transition:transform .5s ease-out .45s; }
+  .lt { opacity:0; transition:transform 1.1s .95s cubic-bezier(.3,1.1,.4,1), opacity .2s .95s; }
+  .open .fF { transform:scaleY(0); } .open .fB { transform:scaleY(1); } .open .lt { opacity:1; transform:translateY(-78px); }
+  .env.gone { opacity:0; transform:translateY(40px) rotate(-3deg) scale(.92); }
+  .seal { position:absolute; left:50%; top:62%; width:88px; height:88px; margin:-44px 0 0 -44px; border-radius:50%; touch-action:none; --p:0; z-index:3;
+          background:radial-gradient(circle at 35% 30%,#f7f8fc,#c8ccd8 45%,#8d93a6 82%,#666c80); color:#4a5170; font-size:36px; display:flex; align-items:center; justify-content:center;
+          box-shadow:0 10px 22px rgba(0,0,0,.6), inset 0 -6px 10px rgba(40,50,80,.4), inset 0 3px 5px rgba(255,255,255,.7), 0 0 calc(8px + var(--p) * 46px) rgba(190,210,255,calc(.18 + var(--p) * .7)); }
+  .seal::before { content:""; position:absolute; inset:8%; border-radius:50%; border:2px solid rgba(70,80,110,.45); }
+  .seal::after { content:""; position:absolute; inset:0; border-radius:50%; background:conic-gradient(from 0deg, rgba(255,255,255,.95) calc(var(--p) * 360deg), rgba(255,255,255,0) 0); }
+  .seal span { position:relative; z-index:1; pointer-events:none; }
+  .env.broken .seal { display:none; }
+  .lp { display:none; position:relative; align-self:stretch; background:linear-gradient(160deg,#fbf3e2,#eadcc0); color:#1f2c46; padding:28px 22px 24px; border-radius:3px; text-align:left; transform-origin:50% 0;
+        font-family:"Marck Script", cursive; font-weight:400; font-size:22px; line-height:1.45; box-shadow:0 24px 50px rgba(0,0,0,.65), inset 0 0 40px rgba(120,90,40,.2); }
+  .lp::before { content:""; position:absolute; inset:7px; border:1px solid rgba(23,36,58,.28); pointer-events:none; }
+  .lp.show { display:block; animation:unfold 1.4s cubic-bezier(.3,.9,.3,1) both; }
+  @keyframes unfold { 0% { opacity:0; transform:perspective(900px) rotateX(-80deg) scaleY(.15); } 55% { opacity:1; transform:perspective(900px) rotateX(-10deg) scaleY(.9); } 100% { transform:none; } }
+  .lp p { margin:0 0 12px; min-height:1px; } .lp .sg { color:var(--wine); text-align:right; margin-top:6px; } .lp .ps { font-family:"Cormorant Garamond",serif; font-style:italic; font-size:17px; font-weight:600; color:#54607e; border-top:1px solid rgba(23,36,58,.25); padding-top:10px; }
+  .caret::after { content:"▍"; color:var(--wine); animation:blink 1s steps(2) infinite; } @keyframes blink { 50% { opacity:0; } }
+  .lp .cta { margin-top:12px; color:#17243A; border-color:rgba(23,36,58,.6); background:linear-gradient(90deg,rgba(23,36,58,.04),rgba(23,36,58,.14),rgba(23,36,58,.04)); background-color:transparent; box-shadow:none; }
+  .lp .cta::after { background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent); }
+
+  /* ---------- ЕТАП 2: архівний документ ---------- */
+  #s1 .bgl { background:radial-gradient(ellipse at 14% 8%,rgba(255,176,96,.42),transparent 46%), repeating-linear-gradient(92deg,rgba(255,255,255,.012) 0 3px,rgba(0,0,0,.05) 3px 7px), linear-gradient(#1c1013,#0d090b); }
+  #s1 .glow { position:absolute; inset:0; background:radial-gradient(circle at 12% 6%,rgba(255,200,130,.28),transparent 40%); animation:cglow 3.2s ease-in-out infinite alternate; }
+  @keyframes cglow { 0% { opacity:.6; } 40% { opacity:1; } 100% { opacity:.75; } }
+  #s1 .candle { position:absolute; left:4%; top:2%; width:48px; height:120px; filter:drop-shadow(0 0 20px rgba(255,180,90,.7)); }
+  .flm { transform-box:fill-box; transform-origin:50% 100%; animation:flk 1.4s ease-in-out infinite; } @keyframes flk { 50% { transform:scale(1.1,.92) rotate(2deg); } }
+  .doc { position:relative; align-self:center; width:100%; transform:rotate(-1.2deg); color:#3b2a20; padding:26px 34px 24px;
+         background:radial-gradient(circle at 20% 10%,rgba(255,255,255,.4),transparent 50%), linear-gradient(#e9dcc0,#dccaa4);
+         box-shadow:0 26px 60px rgba(0,0,0,.75), inset 0 0 70px rgba(120,80,30,.45); }
+  .doc .pil { position:absolute; top:12px; bottom:12px; width:11px; background:linear-gradient(90deg,#a98f56,#f0e2b6,#a98f56); border-radius:3px; opacity:.85; }
+  .doc .pil.l { left:9px; } .doc .pil.r { right:9px; }
+  .doc .pil::before, .doc .pil::after { content:""; position:absolute; left:-3px; right:-3px; height:7px; background:#a98f56; border-radius:2px; } .doc .pil::before { top:-3px; } .doc .pil::after { bottom:-3px; }
+  .doc .cr { position:absolute; width:16px; height:16px; border:2px solid #8e94a6; opacity:.8; } .doc .cr.a { top:5px; left:5px; border-right:0; border-bottom:0; } .doc .cr.b { top:5px; right:5px; border-left:0; border-bottom:0; }
+  .doc .cr.c { bottom:5px; left:5px; border-right:0; border-top:0; } .doc .cr.d { bottom:5px; right:5px; border-left:0; border-top:0; }
+  .stamp { position:absolute; top:6px; right:-6px; width:74px; height:74px; transform:rotate(-14deg); opacity:.82; }
+  .dh { font-family:"Playfair Display",serif; font-weight:700; font-size:26px; letter-spacing:.05em; color:var(--wine); text-align:left; padding-right:56px; }
+  .dsub { font-size:12px; letter-spacing:.26em; font-weight:700; text-transform:uppercase; color:#5c4a3a; margin-top:2px; }
+  .dr { border-top:3px double #3b2a20; margin:9px 0 8px; }
+  .dhl { font-size:19px; text-align:left; color:#2b1d17; letter-spacing:.02em; margin-bottom:10px; }
+  #dBody p { font-size:19.5px; line-height:1.4; margin:0 0 9px; font-weight:600; }
+  #dBody p:first-child::first-letter { font-family:"Playfair Display",serif; font-size:44px; float:left; line-height:.85; padding:4px 7px 0 0; color:var(--wine); font-weight:700; }
+  .ln { opacity:0; transform:translateY(8px); filter:blur(3px); transition:opacity 1s, transform 1s, filter 1s; } .ln.show { opacity:1; transform:none; filter:none; }
+  .note { font-family:"Marck Script",cursive; font-weight:400; font-size:21px; color:#2c4a8c; transform:rotate(-3deg); margin:-2px 0 8px 18px; }
+  .namebox { display:flex; gap:14px; align-items:center; margin:14px -8px 0 -4px; padding:12px 14px; transform:rotate(1.1deg); color:var(--silver);
+             background:linear-gradient(160deg,#1c2e50,#0f1829); border:1px solid rgba(200,204,216,.65); box-shadow:0 14px 30px rgba(0,0,0,.55), inset 0 0 26px rgba(0,0,0,.4); }
+  .namebox svg { flex:0 0 62px; width:62px; height:90px; filter:drop-shadow(0 0 10px rgba(200,215,255,.4)); }
+  .nbk { font-size:11.5px; letter-spacing:.2em; text-transform:uppercase; line-height:1.4; } .nbn { font-family:"Marck Script",cursive; font-weight:400; font-size:48px; line-height:1.05; color:var(--cream); text-shadow:0 0 20px rgba(215,188,131,.55); }
+
+  /* ---------- ЕТАП 3: розслідування ---------- */
+  #s2 .bgl { background:radial-gradient(ellipse at 50% 0%,rgba(255,200,130,.32),transparent 55%), linear-gradient(#150d12,#0b080b); }
+  #s2 .books { position:absolute; left:0; right:0; top:0; height:46%; display:flex; flex-direction:column; justify-content:space-around; opacity:.8; }
+  #s2 .shelf { display:flex; align-items:flex-end; gap:2px; height:44%; border-bottom:5px solid #2a1a14; padding:0 6px; } #s2 .shelf i { flex:1; border-radius:2px 2px 0 0; box-shadow:inset -2px 0 4px rgba(0,0,0,.4); }
+  #s2 .deskTop { position:absolute; left:0; right:0; bottom:0; height:62%; background:repeating-linear-gradient(95deg,rgba(255,255,255,.015) 0 4px,rgba(0,0,0,.08) 4px 9px), linear-gradient(#2a1a16,#120b0b); border-top:2px solid rgba(215,188,131,.35); box-shadow:0 -30px 60px rgba(0,0,0,.6); }
+  #s2 .lamp { position:absolute; left:50%; top:-10%; width:130%; height:90%; transform:translateX(-50%); background:radial-gradient(ellipse at 50% 0%,rgba(255,214,150,.3),transparent 62%); }
+  #s2 .wrap { gap:12px; } #s2 .hd { text-align:left; }
+  .table { position:relative; height:310px; margin-top:6px; }
+  .obj { position:absolute; display:flex; flex-direction:column; align-items:center; gap:6px; animation:bob 3.2s ease-in-out infinite; filter:drop-shadow(0 14px 14px rgba(0,0,0,.7)); }
+  .obj svg { display:block; width:100%; overflow:visible; } .obj .ol { font-size:14px; font-style:italic; color:var(--silver); } .obj.open { animation:none; }
+  @keyframes bob { 50% { transform:translateY(-4px); } }
+  .obj.key { left:0; top:10px; width:152px; transform:rotate(-16deg); } .obj.lett { right:0; top:0; width:140px; transform:rotate(7deg); } .obj.box { left:30%; bottom:0; width:136px; transform:rotate(-3deg); }
+  .obj.key .kg { transform-box:fill-box; transform-origin:20% 50%; transition:transform 1s cubic-bezier(.3,1.4,.5,1), filter 1s; } .obj.key.open .kg { transform:rotate(34deg) scale(1.08); filter:drop-shadow(0 0 12px #ffd98a); }
+  .obj.box .lid { transform-box:fill-box; transform-origin:0 100%; transition:transform 1s cubic-bezier(.3,1.4,.5,1); } .obj.box.open .lid { transform:translate(-3px,-4px) rotate(-44deg); }
+  .obj.box .inner { opacity:0; transition:opacity 1s; } .obj.box.open .inner { opacity:1; }
+  .obj.lett .sl { transition:opacity .4s; } .obj.lett.open .sl { opacity:0; }
+  .cnt { font-family:"Playfair Display",serif; letter-spacing:.14em; font-size:13px; color:var(--champ); text-transform:uppercase; text-align:center; }
+  .clues { display:flex; flex-direction:column; gap:10px; }
+  .clue { position:relative; background:linear-gradient(#efe3c8,#e1d2b0); color:#2a2018; padding:14px 16px 12px 18px; border-left:5px solid var(--wine); box-shadow:0 12px 24px rgba(0,0,0,.55); animation:slideup .8s cubic-bezier(.2,1,.4,1) both; }
+  .clue:nth-child(odd) { transform:rotate(-.8deg); } .clue:nth-child(even) { transform:rotate(.9deg); }
+  .clue::before { content:""; position:absolute; top:-8px; right:22px; width:46px; height:15px; background:rgba(200,204,216,.7); transform:rotate(4deg); box-shadow:0 2px 4px rgba(0,0,0,.3); }
+  .clue h3 { font-size:12.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--wine); margin-bottom:5px; } .clue p { font-size:19.5px; font-weight:700; }
+  @keyframes slideup { from { opacity:0; transform:translateY(30px) rotate(0); } }
+  .fin2 { text-align:center; font-family:"Marck Script",cursive; font-weight:400; font-size:26px; line-height:1.3; color:var(--champ); text-shadow:0 0 20px rgba(255,200,120,.45); }
+
+  /* ---------- ЕТАП 4: бал маскарадів ---------- */
+  #s3 .bgl, #s4 .bgl { background:linear-gradient(#070b18,#121c36 50%,#1c2746 100%); }
+  .win { position:absolute; top:7%; width:17%; height:32%; border-radius:999px 999px 0 0; border:2px solid rgba(200,204,216,.6); background:linear-gradient(#c3d4ff,#6a84c4 55%,#2a3a6a); box-shadow:inset 0 0 24px rgba(0,0,0,.5), 0 0 40px rgba(170,195,255,.35); }
+  .win::before { content:""; position:absolute; left:50%; top:0; bottom:0; width:2px; background:rgba(200,204,216,.5); } .win::after { content:""; position:absolute; top:42%; left:0; right:0; height:2px; background:rgba(200,204,216,.5); }
+  .beam { position:absolute; top:16%; width:22%; height:70%; background:linear-gradient(rgba(190,210,255,.3),transparent); clip-path:polygon(22% 0,78% 0,112% 100%,-28% 100%); transform:skewX(-14deg); animation:beam 9s ease-in-out infinite alternate; }
+  @keyframes beam { from { opacity:.55; } to { opacity:1; } }
+  .cur { position:absolute; top:0; bottom:0; width:15%; background:repeating-linear-gradient(90deg,#1d3260 0 12px,#12203f 12px 24px); }
+  .cur.l { left:0; -webkit-mask-image:linear-gradient(90deg,#000 50%,transparent); mask-image:linear-gradient(90deg,#000 50%,transparent); }
+  .cur.r { right:0; -webkit-mask-image:linear-gradient(270deg,#000 50%,transparent); mask-image:linear-gradient(270deg,#000 50%,transparent); }
+  .val { position:absolute; top:0; left:0; right:0; height:5%; background:radial-gradient(ellipse at 50% 0,#243c72,#101b38 72%); border-bottom:2px solid var(--champ); }
+  .chd { position:absolute; top:3%; left:50%; width:min(52vw,230px); transform:translateX(-50%); filter:drop-shadow(0 0 18px rgba(200,215,255,.45)); }
+  .chd.sm { width:min(24vw,110px); top:2%; } .chd.sm.a { left:14%; } .chd.sm.b { left:86%; }
+  .dr1 { animation:spk 2.6s ease-in-out infinite; } @keyframes spk { 50% { opacity:.35; } }
+  .floor2 { position:absolute; left:-40%; right:-40%; bottom:0; height:36%; background:repeating-conic-gradient(#c9ccd8 0 25%,#1a2236 0 50%) 0 0/86px 86px; transform:perspective(320px) rotateX(63deg); transform-origin:50% 100%; opacity:.55; }
+  .floorfx { position:absolute; left:0; right:0; bottom:0; height:30%; background:linear-gradient(transparent,rgba(8,12,24,.7)); }
+  .guests { position:absolute; left:0; bottom:27%; width:100%; height:22%; fill:#060a14; opacity:.88; }
+  .wr { position:absolute; bottom:-2%; pointer-events:none; filter:drop-shadow(0 6px 10px rgba(0,0,0,.6)); } .wr.l { left:-3%; width:32%; } .wr.r { right:-3%; width:28%; transform:scaleX(-1); }
+  .cand { position:absolute; bottom:6%; width:15%; filter:drop-shadow(0 0 14px rgba(255,200,120,.5)); } .cand.l { left:12%; } .cand.r { right:12%; }
+  #s3 .wrap { align-items:center; text-align:center; } .bt { font-size:clamp(28px,9vw,40px); letter-spacing:.06em; background:linear-gradient(#fff,#D7BC83); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:none; filter:drop-shadow(0 4px 18px rgba(0,0,0,.7)); }
+  .cap.c { text-align:center; max-width:30ch; color:#d9d4ea; text-shadow:0 0 10px #060a14, 0 0 4px #060a14, 0 2px 14px #060a14; } #s3 .hint, #s4 .cap.l { text-shadow:0 0 10px #060a14, 0 0 4px #060a14; }
+  #s3 .win { opacity:.55; } #s3 .wrap::before { content:""; position:absolute; left:-10%; right:-10%; top:-4%; height:32%; background:radial-gradient(ellipse at 50% 40%,rgba(6,10,20,.78),transparent 70%); z-index:-1; }
+  .masks { display:flex; gap:10px; justify-content:center; align-items:flex-start; width:100%; margin:6px 0 2px; }
+  .mask { flex:1 1 0; max-width:150px; display:flex; flex-direction:column; align-items:center; gap:6px; transition:transform .9s cubic-bezier(.3,1.2,.4,1), opacity .8s, filter .8s; animation:bob 3.4s ease-in-out infinite; }
+  .mask:nth-child(2) { margin-top:30px; animation-delay:.5s; } .mask:nth-child(3) { animation-delay:1s; }
+  .mask svg { width:100%; overflow:visible; filter:drop-shadow(0 12px 12px rgba(0,0,0,.7)); } .mask .mn { font-size:11.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--silver); }
+  .mask.sel { transform:translateY(24px) scale(1.4); z-index:3; animation:none; } .mask.sel svg { filter:drop-shadow(0 0 22px var(--gl)) drop-shadow(0 12px 12px rgba(0,0,0,.7)); }
+  .mask.dim { opacity:.28; filter:blur(1.5px) brightness(.6); pointer-events:none; animation:none; transform:scale(.85); }
+  .pred { width:100%; margin-top:30px; padding:16px 18px; background:rgba(12,18,34,.78); border:1px solid rgba(200,204,216,.6); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); box-shadow:0 0 30px rgba(169,160,194,.25); }
+  .pred h3 { font-size:12.5px; letter-spacing:.24em; text-transform:uppercase; color:var(--champ); margin-bottom:6px; } .pred p { font-style:italic; font-size:21px; }
+  .exit { font-family:"Marck Script",cursive; font-weight:400; font-size:29px; color:var(--champ); text-shadow:0 0 20px rgba(255,200,120,.5); line-height:1.25; }
+
+  /* ---------- ЕТАП 5: танець ---------- */
+  #s4 .spot { position:absolute; left:50%; top:0; width:120%; height:100%; transform:translateX(-50%); background:radial-gradient(ellipse at 50% 18%,rgba(255,238,200,.38),rgba(255,238,200,.08) 38%,transparent 66%); }
+  #s4 .wrap { gap:14px; } #s4 .bt { font-size:clamp(24px,7.4vw,34px); text-align:left; letter-spacing:.04em; }
+  .cap.l { text-align:left; }
+  .progs { display:flex; flex-direction:column; gap:10px; transition:opacity .9s, transform .9s; } .progs.gone { opacity:0; transform:translateY(-16px); pointer-events:none; }
+  .pr { display:flex; align-items:center; gap:14px; text-align:left; padding:14px 16px; border-left:3px solid var(--champ); background:linear-gradient(90deg,rgba(215,188,131,.16),rgba(215,188,131,.02)); transition:transform .25s, background .3s; }
+  .pr:active, .pr:hover { transform:translateX(6px); background:linear-gradient(90deg,rgba(215,188,131,.3),rgba(215,188,131,.04)); }
+  .pr .rm { font-family:"Playfair Display",serif; font-size:30px; color:var(--champ); min-width:34px; text-align:center; } .pr h3 { font-size:16px; letter-spacing:.06em; color:var(--cream); } .pr p { font-style:italic; color:var(--silver); font-size:17px; margin-top:2px; }
+  .stage { position:relative; overflow:hidden; min-height:380px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding-bottom:14px; border:1px solid rgba(215,188,131,.45);
+           background:radial-gradient(ellipse at 50% 52%,rgba(255,236,190,.42),rgba(255,236,190,0) 62%), radial-gradient(ellipse at 50% -10%,rgba(255,238,200,.5),rgba(255,238,200,0) 58%), linear-gradient(#0e1528,#1a2442); box-shadow:0 0 40px rgba(215,188,131,.18), inset 0 0 40px rgba(0,0,0,.5); }
+  .stage .fl2 { position:absolute; left:-30%; right:-30%; bottom:0; height:34%; background:repeating-conic-gradient(#c9ccd8 0 25%,#1a2236 0 50%) 0 0/60px 60px; transform:perspective(220px) rotateX(62deg); transform-origin:50% 100%; opacity:.5; }
+  .stage .glowfl { position:absolute; left:10%; right:10%; bottom:2%; height:22%; background:radial-gradient(ellipse,rgba(255,225,160,.5),transparent 70%); }
+  .dancers { position:relative; width:min(310px,88%); display:block; margin-bottom:6px; overflow:visible; filter:drop-shadow(0 0 16px rgba(255,225,160,.45)); } .dancers .sil { fill:#0b1022; stroke:rgba(240,219,166,.85); stroke-width:1.3; } .dancers .her .sil { fill:#4a2146; } .dancers .her .gown { fill:#5a2a58; }
+  .dancers .cp { transform-box:fill-box; transform-origin:50% 100%; } .dancers .gown { transform-box:fill-box; transform-origin:50% 0; animation:gsway 2.6s ease-in-out infinite; } @keyframes gsway { 50% { transform:skewX(-5deg) scaleX(1.05); } }
+  .waltz .cp { animation:waltz 6.5s ease-in-out infinite; } @keyframes waltz { 0% { transform:translateX(-46px) scaleX(1); } 25% { transform:translateX(0) scaleX(.62); } 50% { transform:translateX(46px) scaleX(-1); } 75% { transform:translateX(0) scaleX(-.62); } 100% { transform:translateX(-46px) scaleX(1); } }
+  .riddle .cp { animation:riddle 4.2s ease-in-out infinite; } @keyframes riddle { 0%,12% { transform:translateX(-34px) rotate(-3deg); } 38%,50% { transform:translateX(34px) rotate(3deg); } 76%,88% { transform:translateX(-34px) rotate(-3deg); } 100% { transform:translateX(-34px) rotate(-3deg); } }
+  .last .cp { animation:lastd 5s ease-in-out infinite; } @keyframes lastd { 50% { transform:rotate(3deg) translateY(-3px); } 0%,100% { transform:rotate(-3deg); } } .last .him { transform:translateX(-14px); } .last .her { transform:translateX(10px); }
+  .dname { font-family:"Marck Script",cursive; font-weight:400; font-size:40px; color:var(--champ); text-shadow:0 0 22px rgba(255,200,120,.55); line-height:1.1; text-align:center; position:relative; }
+  .dmsg { position:relative; font-style:italic; font-size:20px; text-align:center; max-width:30ch; margin-top:4px; } .dend { font-family:"Marck Script",cursive; font-weight:400; font-size:26px; color:var(--cream); text-align:center; line-height:1.3; text-shadow:0 0 16px rgba(0,0,0,.7); }
+  .rise { position:absolute; bottom:20%; width:5px; height:5px; border-radius:50%; background:radial-gradient(#fff6cf,#D7BC83); box-shadow:0 0 8px #ffd98a; animation:rise 5s linear infinite; pointer-events:none; } @keyframes rise { to { transform:translate(var(--rx),-300px); opacity:0; } }
+  .fp { position:absolute; top:-20px; width:11px; height:15px; border-radius:70% 0 70% 0; background:linear-gradient(135deg,#fff,#d9d3e8); animation:fp 3.4s ease-in forwards; pointer-events:none; }
+  @keyframes fp { 0% { transform:translate(0,0) rotate(0); opacity:.95; } 85% { opacity:.95; } 100% { transform:translate(var(--fx),var(--fy)) rotate(var(--fr)); opacity:.8; } }
+
+  /* ---------- ЕТАП 6: останній конверт ---------- */
+  #s5 .bgl, #s6 .bgl { background:linear-gradient(#060a16 0%,#0f1830 40%,#1a2a48 80%,#1c2c4a 100%); }
+  #s5 .moon { left:-6%; top:12%; width:clamp(150px,44vw,260px); aspect-ratio:1; } #s6 .moon { right:10%; top:4%; width:clamp(90px,24vw,150px); aspect-ratio:1; }
+  #s5 .wrap { align-items:center; text-align:center; gap:18px; } .env.small { width:min(250px,72%); cursor:pointer; margin:20px 0 6px; animation:bob 3.4s ease-in-out infinite; } .env.small.open { animation:none; }
+  .env.small .glowp { position:absolute; inset:-14px; border-radius:12px; box-shadow:0 0 40px rgba(200,215,255,.35); animation:gpulse 2.4s ease-in-out infinite; pointer-events:none; } @keyframes gpulse { 50% { box-shadow:0 0 70px rgba(200,215,255,.6); } }
+  #s5 .lp { width:100%; } #s5 .lp .sg2 { text-align:right; font-size:25px; color:var(--wine); margin-top:6px; }
+  /* ---------- ЕТАП 7: фінал ---------- */
+  #s6 .wrap { gap:14px; } .big { font-size:clamp(30px,9.6vw,46px); letter-spacing:.03em; background:linear-gradient(#fff,#C8CCD8 55%,#D7BC83); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 4px 20px rgba(0,0,0,.7)); }
+  #s6 p.tx { font-size:20px; } .qq { font-family:"Marck Script",cursive; font-weight:400; font-size:32px; color:var(--champ); line-height:1.2; text-shadow:0 0 22px rgba(255,200,120,.45); margin-top:6px; }
+  .opts { display:flex; flex-direction:column; gap:10px; margin-top:4px; } .opt { text-align:left; padding:14px 18px; font-family:"Playfair Display",serif; font-size:16px; letter-spacing:.03em; border:1px solid var(--c); color:var(--cream);
+         background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.015)); box-shadow:0 0 18px rgba(0,0,0,.4), inset 4px 0 0 var(--c); transition:transform .25s; } .opt:active { transform:translateX(6px) scale(.99); }
+  .ans { display:none; padding:18px 18px; border:1px solid rgba(215,188,131,.6); background:rgba(12,18,34,.72); box-shadow:0 0 36px rgba(215,188,131,.22); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); font-style:italic; font-size:21px; line-height:1.4; }
+  .ans.show { display:block; animation:enter 1s both; } .ans .a2 { font-style:normal; font-family:"Marck Script",cursive; font-weight:400; font-size:24px; color:var(--champ); margin-top:8px; text-align:right; }
+  .signoff { font-style:italic; color:var(--silver); font-size:17px; text-align:center; } .row2 { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  #openchat { display:none; } .flies { position:absolute; inset:0; pointer-events:none; } .fly { position:absolute; width:4px; height:4px; border-radius:50%; background:#ffe9a8; box-shadow:0 0 10px 3px rgba(255,220,130,.8); animation:fly 6s ease-in-out infinite alternate; } @keyframes fly { to { transform:translate(var(--fx),var(--fy)); opacity:.3; } }
+
+  @media (min-width:700px) { .wrap { width:min(100%,600px); } body { font-size:21px; } #dBody p { font-size:21px; } .table { height:340px; } }
+  @media (max-width:370px) { body { font-size:18px; } .dh { font-size:22px; } .lp { font-size:20px; } .obj.key { width:132px; } .obj.lett { width:124px; } .obj.box { width:120px; } }
+  @media (max-height:520px) and (orientation:landscape) { .wrap { width:min(100%,640px); } .table { height:250px; } #t0s { display:none; } #s0 .hd { font-size:20px; } #s0 .env { margin:10px 0 4px; width:min(250px,44%); } .stage { min-height:320px; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+    .petal, .stars i, .rise, .fly { display:none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="prog"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<canvas id="conf"></canvas>
+<div id="fade"></div>
+<button id="mus" aria-label="музика" title="музика">🎵</button>
+
+<!-- ============ ЕТАП 1 ============ -->
+<section class="scene" id="s0">
+  <div class="bgl">
+    <div class="stars" data-n="70"></div><div class="moon"></div>
+    <svg class="trees" viewBox="0 0 400 140" preserveAspectRatio="none"><path d="M0 140V96Q14 66 30 94Q42 52 62 92Q78 74 96 98Q118 48 142 96Q160 82 178 104Q202 56 226 100Q246 80 266 104Q288 60 312 100Q334 78 352 102Q374 64 400 96V140Z" fill="#070b16"/><path d="M0 140V112Q30 98 60 112Q96 90 130 112Q170 96 210 114Q250 92 290 114Q330 98 400 112V140Z" fill="#04070f"/></svg>
+    <div class="fog" style="bottom:6%"></div>
+  </div>
+  <div class="sc"><div class="wrap">
+    <p class="kick" id="t0"></p>
+    <p class="cap" id="t0s"></p>
+    <h1 class="hd" id="s0h"></h1>
+    <p class="cap" id="s0c"></p>
+    <div class="env" id="env"><svg id="envsvg" viewBox="0 0 300 200"></svg><button class="seal" id="seal" aria-label="печатка"><span>☾</span></button></div>
+    <p class="hint" id="s0hint"></p>
+    <div class="lp" id="lp0"><div id="lp0t"></div><button class="cta" id="start" style="display:none"></button></div>
+  </div></div>
+</section>
+
+<!-- ============ ЕТАП 2 ============ -->
+<section class="scene" id="s1">
+  <div class="bgl">
+    <div class="glow"></div>
+    <svg class="candle" viewBox="0 0 48 120"><rect x="14" y="40" width="20" height="78" rx="3" fill="#efe0b8"/><rect x="14" y="40" width="20" height="78" rx="3" fill="url(#gShadeC)"/><path d="M24 40v-8" stroke="#3a2a22" stroke-width="2"/><path class="flm" d="M24 6C17 18 16 26 24 32C32 26 31 18 24 6Z" fill="#ffc84e"/><path class="flm" d="M24 14C21 21 21 26 24 29C27 26 27 21 24 14Z" fill="#fff4c0"/></svg>
+  </div>
+  <div class="sc"><div class="wrap">
+    <article class="doc" id="doc">
+      <i class="pil l"></i><i class="pil r"></i><i class="cr a"></i><i class="cr b"></i><i class="cr c"></i><i class="cr d"></i>
+      <svg class="stamp" viewBox="0 0 100 100"><defs><path id="stp" d="M50 50m-33 0a33 33 0 1 1 66 0a33 33 0 1 1-66 0"/></defs>
+        <g fill="none" stroke="#7a2a3d" stroke-width="2.2"><circle cx="50" cy="50" r="46"/><circle cx="50" cy="50" r="40"/><circle cx="50" cy="50" r="22"/></g>
+        <text font-family="Playfair Display,serif" font-size="9.5" font-weight="700" fill="#7a2a3d" letter-spacing="1.6"><textPath href="#stp">ТОВАРИСТВО СЕЗОНУ ✦ ТОВАРИСТВО СЕЗОНУ ✦</textPath></text>
+        <text x="50" y="59" text-anchor="middle" font-size="26" fill="#7a2a3d">✦</text></svg>
+      <div class="dh" id="dTitle"></div><div class="dsub" id="dSub"></div>
+      <div class="dr"></div>
+      <h2 class="dhl" id="dHl"></h2>
+      <div id="dBody"></div>
+      <div class="namebox ln" id="nameBox">
+        <svg viewBox="0 0 80 112"><ellipse cx="40" cy="62" rx="29" ry="46" fill="url(#gMirror)" stroke="url(#gSilver)" stroke-width="5"/><path d="M40 4c-6 0-10 5-8 10 3-3 5 0 8 0s5-3 8 0c2-5-2-10-8-10z" fill="url(#gSilver)"/><path d="M22 40 Q40 22 58 40" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="3" stroke-linecap="round"/></svg>
+        <div><div class="nbk" id="nbK"></div><div class="nbn" id="nbN"></div></div>
+      </div>
+    </article>
+    <button class="cta" id="n1" style="visibility:hidden"></button>
+  </div></div>
+</section>
+
+<!-- ============ ЕТАП 3 ============ -->
+<section class="scene" id="s2">
+  <div class="bgl">
+    <div class="books" id="books"></div><div class="lamp"></div><div class="deskTop"></div>
+  </div>
+  <div class="sc"><div class="wrap">
+    <h1 class="hd" id="s2h"></h1>
+    <p class="cap" id="s2s"></p>
+    <div class="table">
+      <button class="obj key" id="oKey" aria-label="ключ">
+        <svg viewBox="0 0 150 56"><g class="kg" fill="url(#gGold)" stroke="#6b5526" stroke-width="1"><circle cx="26" cy="28" r="20"/><circle cx="26" cy="9" r="6"/><circle cx="7" cy="28" r="6"/><circle cx="45" cy="28" r="6"/><circle cx="26" cy="28" r="9" fill="#17110a"/><rect x="44" y="24" width="88" height="8" rx="3"/><rect x="114" y="32" width="8" height="15"/><rect x="126" y="32" width="8" height="10"/><rect x="102" y="32" width="6" height="8"/></g></svg>
+        <span class="ol" id="lKey"></span></button>
+      <button class="obj lett" id="oLet" aria-label="лист"><div class="env mini" id="miniEnv" style="width:100%;margin:0;transform:none;filter:none"><svg id="miniSvg" viewBox="0 0 300 200"></svg></div><span class="ol" id="lLet"></span></button>
+      <button class="obj box" id="oBox" aria-label="скринька">
+        <svg viewBox="0 0 140 100"><rect x="10" y="44" width="120" height="50" rx="6" fill="url(#gWine)" stroke="url(#gGold)" stroke-width="2.5"/><ellipse class="inner" cx="70" cy="46" rx="48" ry="9" fill="url(#gGlow)"/><g class="inner"><rect x="52" y="30" width="36" height="14" rx="4" fill="#F6EBDD" transform="rotate(-6 70 37)"/></g>
+          <g class="lid"><path d="M10 44Q10 12 70 12Q130 12 130 44Z" fill="url(#gWine2)" stroke="url(#gGold)" stroke-width="2.5"/><path d="M26 40Q70 6 114 40" fill="none" stroke="rgba(215,188,131,.55)" stroke-width="2"/></g>
+          <circle cx="70" cy="46" r="7.5" fill="url(#gGold)" stroke="#6b5526"/><path d="M70 43v6" stroke="#17110a" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <span class="ol" id="lBox"></span></button>
+    </div>
+    <div class="cnt" id="s2c"></div>
+    <div class="clues" id="clues"></div>
+    <p class="fin2" id="s2f" style="display:none"></p>
+    <button class="cta" id="n2" style="display:none"></button>
+  </div></div>
+</section>
+
+<!-- ============ ЕТАП 4 ============ -->
+<section class="scene" id="s3">
+  <div class="bgl">
+    <div class="win" style="left:20%"></div><div class="win" style="left:41.5%"></div><div class="win" style="left:63%"></div>
+    <div class="beam" style="left:14%"></div><div class="beam" style="left:38%;animation-delay:-3s"></div><div class="beam" style="left:60%;animation-delay:-6s"></div>
+    <div class="cur l"></div><div class="cur r"></div><div class="val"></div>
+    <div class="chdbox" data-chd="1"></div>
+    <svg class="guests" id="guests3" viewBox="0 0 400 100" preserveAspectRatio="xMidYMax slice"></svg>
+    <div class="floor2"></div><div class="floorfx"></div>
+    <svg class="cand l" viewBox="0 0 60 160"><use href="#candel"/></svg><svg class="cand r" viewBox="0 0 60 160"><use href="#candel"/></svg>
+    <svg class="wr l" viewBox="0 0 160 130"><use href="#rosecl"/></svg><svg class="wr r" viewBox="0 0 160 130"><use href="#rosecl"/></svg>
+  </div>
+  <div class="sc"><div class="wrap">
+    <h1 class="bt" id="s3h"></h1>
+    <p class="cap c" id="s3t"></p>
+    <p class="hint" id="s3hint"></p>
+    <div class="masks" id="masks"></div>
+    <div class="pred" id="pred" style="display:none"></div>
+    <p class="exit" id="s3x" style="display:none"></p>
+    <button class="cta" id="n3" style="display:none"></button>
+  </div></div>
+</section>
+
+<!-- ============ ЕТАП 5 ============ -->
+<section class="scene" id="s4">
+  <div class="bgl">
+    <div class="win" style="left:6%;width:14%"></div><div class="win" style="left:78%;width:14%"></div>
+    <div class="beam" style="left:2%"></div><div class="beam" style="left:74%;animation-delay:-4s"></div>
+    <div class="spot"></div><div class="cur l"></div><div class="cur r"></div>
+    <div class="chdbox" data-chd="2"></div>
+    <div class="floor2"></div><div class="floorfx"></div>
+  </div>
+  <div class="sc"><div class="wrap">
+    <h1 class="bt" id="s4h"></h1>
+    <p class="cap l" id="s4t"></p>
+    <div class="progs" id="progs"></div>
+    <div class="stage" id="stage" style="display:none">
+      <div class="fl2"></div><div class="glowfl"></div>
+      <svg class="dancers" id="dancers" viewBox="0 0 240 240">
+        <g class="cp"><g class="her"><path class="sil gown" d="M70 120C58 150 40 192 28 228L120 228C112 190 100 150 92 118Z"/><path class="sil" d="M72 124L69 88Q81 78 92 88L93 124Z"/><circle class="sil" cx="81" cy="70" r="11"/><circle class="sil" cx="72" cy="59" r="6.5"/><path class="sil" d="M72 96Q56 112 58 128" fill="none" stroke="#080c18" stroke-width="5" stroke-linecap="round"/><path d="M90 94Q112 86 132 82" fill="none" stroke="#080c18" stroke-width="5" stroke-linecap="round"/></g>
+        <g class="him"><path class="sil" d="M140 150L134 228M154 150L162 228" fill="none" stroke="#080c18" stroke-width="9" stroke-linecap="round"/><path class="sil" d="M131 92Q148 82 166 92L164 154L133 154Z"/><path class="sil" d="M133 154L126 184L141 162M164 154L172 184L157 162"/><circle class="sil" cx="148" cy="68" r="11"/><path class="sil" d="M137 62Q148 50 160 62Z"/><path d="M134 102Q120 110 106 114" fill="none" stroke="#080c18" stroke-width="5" stroke-linecap="round"/><path d="M162 98Q154 82 132 82" fill="none" stroke="#080c18" stroke-width="5" stroke-linecap="round"/></g></g>
+      </svg>
+      <div class="dname" id="dname"></div><p class="dmsg" id="dmsg"></p>
+    </div>
+    <p class="dend" id="dend" style="display:none"></p>
+    <button class="cta" id="n4" style="display:none"></button>
+  </div></div>
+</section>
+
+<!-- ============ ЕТАП 6 ============ -->
+<section class="scene" id="s5">
+  <div class="bgl">
+    <div class="stars" data-n="60"></div><div class="moon"></div>
+    <svg class="trees" viewBox="0 0 400 140" preserveAspectRatio="none" style="height:20%"><path d="M0 140V100Q40 76 80 100Q130 70 180 102Q230 78 280 102Q340 74 400 100V140Z" fill="#070b16"/></svg>
+    <div class="fog" style="bottom:4%"></div><div class="fog" style="bottom:16%;animation-delay:-8s;opacity:.7"></div>
+    <svg class="wr l" viewBox="0 0 160 130" style="width:44%;bottom:-3%"><use href="#rosecl"/></svg><svg class="wr r" viewBox="0 0 160 130" style="width:40%;bottom:-3%"><use href="#rosecl"/></svg>
+  </div>
+  <div class="sc"><div class="wrap">
+    <p class="kick" id="s5k"></p>
+    <div class="env small" id="env5" role="button" tabindex="0" aria-label="конверт"><div class="glowp"></div><svg id="env5svg" viewBox="0 0 300 200"></svg></div>
+    <p class="hint" id="s5hint"></p>
+    <div class="lp" id="lp5"><div id="lp5t"></div><button class="cta" id="n5" style="display:none"></button></div>
+  </div></div>
+</section>
+
+<!-- ============ ЕТАП 7 ============ -->
+<section class="scene" id="s6">
+  <div class="bgl">
+    <div class="stars" data-n="70"></div><div class="moon"></div><div class="flies" id="flies"></div>
+    <svg class="trees" viewBox="0 0 400 140" preserveAspectRatio="none" style="height:22%"><path d="M0 140V92Q20 62 44 92Q64 50 92 94Q120 70 150 100Q184 54 214 98Q248 76 280 102Q316 60 346 98Q374 76 400 96V140Z" fill="#070b16"/></svg>
+    <svg class="wr l" viewBox="0 0 160 130" style="width:46%;bottom:-3%"><use href="#rosecl"/></svg><svg class="wr r" viewBox="0 0 160 130" style="width:36%;bottom:-3%"><use href="#rosecl"/></svg>
+  </div>
+  <div class="sc"><div class="wrap">
+    <h1 class="big" id="s6h"></h1>
+    <p class="tx" id="s6t1"></p><p class="tx" id="s6t2"></p>
+    <p class="qq" id="s6q"></p>
+    <div class="opts" id="opts"></div>
+    <div class="ans" id="ans"><div id="ans1"></div><div class="a2" id="ans2"></div></div>
+    <div class="row2"><a class="cta" id="openchat" href="#" style="text-decoration:none"></a><p class="signoff" id="s6e" style="display:none"></p><button class="cta" id="restart" style="display:none"></button></div>
+  </div></div>
+</section>
+
+<!-- ============ спільні SVG-визначення ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gNavy" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a3f72"/><stop offset="1" stop-color="#0f1a35"/></linearGradient>
+    <linearGradient id="gNavy2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22366a"/><stop offset="1" stop-color="#0d1730"/></linearGradient>
+    <linearGradient id="gNavy3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c4478"/><stop offset="1" stop-color="#16244a"/></linearGradient>
+    <linearGradient id="gSilver" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f6fb"/><stop offset=".5" stop-color="#b5bacb"/><stop offset="1" stop-color="#7c8296"/></linearGradient>
+    <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5e4b0"/><stop offset=".55" stop-color="#d7bc83"/><stop offset="1" stop-color="#8e7236"/></linearGradient>
+    <linearGradient id="gWine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c3350"/><stop offset="1" stop-color="#3a1727"/></linearGradient>
+    <linearGradient id="gWine2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d3b5c"/><stop offset="1" stop-color="#4a2036"/></linearGradient>
+    <linearGradient id="gMirror" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d5a96"/><stop offset=".5" stop-color="#16244a"/><stop offset="1" stop-color="#2c4478"/></linearGradient>
+    <linearGradient id="gShadeC" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="rgba(120,80,30,.35)"/><stop offset=".5" stop-color="rgba(255,255,255,0)"/><stop offset="1" stop-color="rgba(120,80,30,.3)"/></linearGradient>
+    <radialGradient id="gGlow"><stop offset="0" stop-color="#fff2bc"/><stop offset=".6" stop-color="rgba(255,200,110,.7)"/><stop offset="1" stop-color="rgba(255,200,110,0)"/></radialGradient>
+
+    <g id="candel" fill="none" stroke="url(#gSilver)" stroke-width="3" stroke-linecap="round">
+      <path d="M30 156V70M14 158h32M20 150h20"/><path d="M30 80Q8 80 8 56M30 80Q52 80 52 56"/>
+      <rect x="4" y="30" width="8" height="24" fill="#efe0b8" stroke="none"/><rect x="26" y="26" width="8" height="30" fill="#efe0b8" stroke="none"/><rect x="48" y="30" width="8" height="24" fill="#efe0b8" stroke="none"/>
+      <path class="flm" d="M8 14c-4 8-3 12 0 14c3-2 4-6 0-14z" fill="#ffc84e" stroke="none"/><path class="flm" d="M30 8c-4 8-3 12 0 14c3-2 4-6 0-14z" fill="#ffc84e" stroke="none"/><path class="flm" d="M52 14c-4 8-3 12 0 14c3-2 4-6 0-14z" fill="#ffc84e" stroke="none"/>
+    </g>
+    <g id="rosecl">
+      <path d="M30 124C18 96 24 60 52 44C44 70 52 96 74 116Z" fill="#17342e"/><path d="M110 126C120 98 112 70 88 52C94 76 86 98 70 118Z" fill="#15302b"/><path d="M80 120C70 94 82 66 102 52C98 76 106 98 120 108Z" fill="#1c3d35"/>
+      <g id="wr1"><circle cx="54" cy="70" r="30" fill="#e6e1ee"/><path d="M54 42c-17 4-27 20-23 36c4 14 20 24 36 18c14-5 20-23 11-37C71 48 62 40 54 42z" fill="#f5f2f8"/><path d="M54 52c-11 2-18 12-15 22c3 9 14 14 23 10c9-3 12-14 7-22c-3-6-9-10-15-10z" fill="#fff" stroke="#d7d0e2"/><path d="M54 60c-6 1-10 7-8 13c2 5 9 7 13 4c5-3 5-9 2-13c-2-3-4-4-7-4z" fill="#f1ecf6" stroke="#cfc8dc"/><path d="M54 66c-3 0-4 3-3 5s4 3 6 1s1-5-3-6z" fill="#e3dced" stroke="#c4bcd4"/></g>
+      <g transform="translate(60 -8) scale(.78)"><use href="#wr1"/></g><g transform="translate(-6 30) scale(.55)"><use href="#wr1"/></g>
+    </g>
+  </defs>
+</svg>
+
+<script>
+/* =================================================================================
+   НАЛАШТУВАННЯ — усі персональні дані та тексти змінюються ТІЛЬКИ тут
+   ================================================================================= */
+const CONFIG = {
+  name: "Настя",                         // її ім'я
+  nameVoc: "Насте",                      // її ім'я у кличному відмінку
+  author: "Ваш загадковий джентльмен",   // підпис автора
+  telegram: "",                          // твій Telegram-нікнейм БЕЗ @ (напр. "vlad_zag")
+  whatsapp: "",                          // АБО номер WhatsApp без + (напр. "380501234567"). Якщо обидва порожні — покажеться подяка
+  musicFile: "",                         // свій аудіофайл (напр. "waltz.mp3"). Порожньо = вбудований тихий вальс
+  sounds: true,                          // тихі звуки (печатка, лист, дзвіночок, маска)
+  music: true,                           // показувати кнопку музики
+  speed: 1,                              // швидкість появи тексту (1 = звичайна, 0.5 = удвічі швидше)
+  notify: { ntfyTopic: "", emailKey: "", url: "" },   // необов'язкові сповіщення тобі (можна лишити порожніми)
+
+  title: "ВІСНИК СЕЗОНУ II — ТАЄМНИЦЯ ЗАГУБЛЕНОГО ЛИСТА",
+  subtitle: "Один сезон завершився. Але одна історія так і не отримала свого завершення…",
+
+  s1: {
+    heading: "ВИ ОТРИМАЛИ ЛИСТ, ЯКИЙ НЕ МАВ ПОТРАПИТИ ДО ВАШИХ РУК…",
+    caption: "Доставлено опівночі. Без імені відправника.",
+    onEnvelope: "Для однієї особливої леді",
+    hint: "Торкніться печатки й утримуйте, щоб дізнатися таємницю.",
+    letter: [
+      "Дорога леді,",
+      "Я сподівався, що після завершення минулого сезону мені вдасться залишити деякі думки при собі.",
+      "Але, як виявилося, мовчання — значно складніше мистецтво, ніж я припускав.",
+      "Тому я наважився написати вам знову.",
+      "Якщо ви готові до ще однієї маленької пригоди, дозвольте мені провести вас крізь цей сезон."
+    ],
+    sign: "Ваш поки що невідомий джентльмен",
+    postscript: "Я не встиг сказати вам дещо під час минулого сезону. І боюся, що ще один сезон мовчання стане для мене нестерпним.",
+    button: "Розпочати другий сезон"
+  },
+  s2: {
+    title: "ВІСНИК СЕЗОНУ",
+    subtitle: "Спеціальний випуск №2",
+    headline: "СВІТСЬКЕ ТОВАРИСТВО ЗНОВУ ВТРАТИЛО СПОКІЙ!",
+    paragraphs: [
+      "Любі читачі!",
+      "Після тривалої перерви світське товариство знову готується до подій, про які говоритимуть ще довго.",
+      "Особлива леді повернулася.",
+      "І цього разу, здається, хтось дуже наполегливо намагається привернути її увагу.",
+      "За нашими джерелами, один загадковий джентльмен уже кілька вечорів поспіль з’являється там, де буває вона.",
+      "Випадковість?",
+      "Світська хроніка має серйозні сумніви.",
+      "Але хто він — поки що залишається загадкою."
+    ],
+    notes: [ { after: 2, text: "підкреслено двічі!" }, { after: 5, text: "ой, навряд чи…" } ],
+    nameKicker: "Найочікуваніше повернення сезону",
+    button: "Перейти до розслідування"
+  },
+  s3: {
+    heading: "ХТО ВІН? ТРИ ПІДКАЗКИ ДО ОДНІЄЇ ТАЄМНИЦІ",
+    subtitle: "Деякі джентльмени приховують свої почуття краще, ніж власні імена.",
+    objects: { key: "Старовинний ключ", letter: "Закритий лист", box: "Маленька скринька" },
+    countLabel: "Підказок знайдено:",
+    clues: [
+      { t: "ПІДКАЗКА №1 — «ЙОГО НАМІРИ»",   m: "Він не прагне бути найгучнішим у залі. Йому достатньо одного погляду тієї, заради якої він прийшов." },
+      { t: "ПІДКАЗКА №2 — «ЙОГО СЛАБКІСТЬ»", m: "Він може годинами добирати правильні слова для листа, але варто їй усміхнутися — і всі заготовлені фрази зникають." },
+      { t: "ПІДКАЗКА №3 — «ЙОГО СЕКРЕТ»",    m: "У нього є одна маленька таємниця: він створив для вас цілу історію, лише щоб побачити вашу усмішку ще раз." }
+    ],
+    finale: "Схоже, загадковий джентльмен набагато ближче, ніж ви думаєте…",
+    button: "Зустрітися з ним на балу"
+  },
+  s4: {
+    heading: "БАЛ МАСКАРАДІВ",
+    text: "Сьогодні кожен приховує своє ім’я за маскою. Але чи можна приховати почуття?",
+    hint: "Оберіть маску, що підходить саме вам.",
+    masks: [
+      { n: "Золота",  c: "gold",   t: "ЗОЛОТА МАСКА",   m: "Ваша присутність здатна змінити настрій цілого вечора." },
+      { n: "Срібна",  c: "silver", t: "СРІБНА МАСКА",   m: "Найважливіші зустрічі часто відбуваються тоді, коли їх зовсім не очікуєш." },
+      { n: "Бордова", c: "wine",   t: "БОРДОВА МАСКА",  m: "Сьогодні одна таємниця нарешті перестане бути таємницею." }
+    ],
+    exit: "Ваш вихід, леді. Цей вечір належить вам.",
+    button: "Зробити наступний крок"
+  },
+  s5: {
+    heading: "ОДИН ТАНЕЦЬ. ДВІ ДОЛІ.",
+    text: "Кажуть, що під час балу можна дізнатися про людину більше, ніж за сотню листів.",
+    dances: [
+      { r: "I",   t: "ВАЛЬС ПІД ЗОРЯМИ",       s: "Трохи ніжності, трохи мрій і багато поглядів.",                    k: "waltz",  m: "Світ закружляв повільно й ніжно. Здається, зорі теж не поспішають нікуди…" },
+      { r: "II",  t: "ТАНЕЦ ЗАГАДОК",           s: "Кожен крок наближає до відповіді, яку ви давно шукали.",          k: "riddle", m: "Крок уперед, крок убік — і відповідь стає ближчою, ніж була хвилину тому." },
+      { r: "III", t: "ОСТАННІЙ ТАНЕЦЬ ВЕЧОРА",   s: "Для тих, хто не хоче, щоб цей вечір закінчувався.",               k: "last",   m: "Музика стихає, а нікому не хочеться поспішати. Ще лише один танець…" }
+    ],
+    ending: "Деякі моменти хочеться повторювати знову і знову.",
+    button: "Знайти останній лист"
+  },
+  s6: {
+    kicker: "Останній конверт сезону",
+    onEnvelope: "Відкрити лише тоді, коли будете готові дізнатися правду.",
+    hint: "Торкніться конверта.",
+    letter: [
+      "Дорога {nameVoc},",
+      "Мабуть, ви вже здогадалися, що за всіма цими підказками, листами та маленькими таємницями ховається одна цілком реальна людина.",
+      "Я не знаю, чи можна назвати це справжньою світською інтригою, але мені дуже хотілося знову подарувати вам щось незвичайне.",
+      "Після першого сезону я зрозумів одну річ: деякі історії не хочеться завершувати.",
+      "Тому я вирішив, що наша маленька пригода заслуговує на продовження.",
+      "Сподіваюся, цей сезон подарував вам ще більше усмішок, ніж попередній.",
+      "І хто знає…",
+      "Можливо, третій сезон уже чекає за рогом."
+    ],
+    sign: "Ваш незмінно загадковий джентльмен",
+    button: "Далі"
+  },
+  s7: {
+    heading: "І ЦЕ ЩЕ НЕ КІНЕЦЬ…",
+    text1: "Кажуть, найкращі історії не мають поспішати із завершенням.",
+    text2: "Тому перш ніж завіса опуститься, дозвольте поставити вам одне запитання.",
+    question: "Чи готові ви до третього сезону?",
+    options: [
+      { b: "Так! Я хочу продовження 💗",  c: "#D7BC83", a: "Тоді приготуйтеся, леді: третій сезон обіцяє бути ще загадковішим. До зустрічі!" },
+      { b: "Звичайно, джентльмене 🌹",    c: "#C8CCD8", a: "Ви робите мене найщасливішим із усіх джентльменів цього сезону." },
+      { b: "Я вже чекаю! ✨",              c: "#A9A0C2", a: "Тоді не змушуватиму вас чекати довго. Завіса ще не опустилася…" }
+    ],
+    thanks: "Дякую, леді. Цей сезон був створений заради вашої усмішки. 💗",
+    openChat: "Відкрити чат і надіслати відповідь ✉",
+    signoff: "Видано з любов’ю. Спеціально для однієї особливої леді.",
+    restart: "Пережити сезон знову"
+  }
+};
+/* ================================================================================= */
+
+const $ = id => document.getElementById(id);
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const K = () => (RM ? .12 : CONFIG.speed);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const wait = ms => sleep(ms * K());
+const T = s => String(s).replaceAll("{name}", CONFIG.name).replaceAll("{nameVoc}", CONFIG.nameVoc).replaceAll("{author}", CONFIG.author);
+const txt = (id, s) => { const e = $(id); if (e) e.textContent = T(s); };
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = T(text); return e; };
+const safe = fn => { try { fn(); } catch (e) {} };
+const vib = p => safe(() => navigator.vibrate && navigator.vibrate(p));
+const reveal = e => { e.classList.add("show"); };
+const smooth = e => safe(() => e.scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "center" }));
+const smoothEnd = e => safe(() => e.scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "nearest" }));
+
+/* ---------- звуки (WebAudio, без файлів) ---------- */
+let actx = null;
+function ac(){ if (!actx) safe(() => { actx = new (window.AudioContext || window.webkitAudioContext)(); }); if (actx && actx.state === "suspended") safe(() => actx.resume()); return actx; }
+function tone(f, t, d, v, type = "sine"){
+  const c = ac(); if (!c) return; const o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + d + .05);
+}
+function noise(d, f, v, q = 1){
+  const c = ac(); if (!c) return; const len = Math.floor(c.sampleRate * d), buf = c.createBuffer(1, len, c.sampleRate), a = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) a[i] = (Math.random() * 2 - 1) * (1 - i / len);
+  const s = c.createBufferSource(); s.buffer = buf; const bp = c.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = q;
+  const g = c.createGain(); g.gain.value = v; s.connect(bp); bp.connect(g); g.connect(c.destination); s.start();
+}
+const sfx = {
+  bell(){ if (CONFIG.sounds) safe(() => { const c = ac(); if (!c) return; const t = c.currentTime; [988,1480,1976].forEach((f,i) => tone(f, t, 1.6 - i*.35, [.06,.03,.015][i])); }); },
+  paper(){ if (CONFIG.sounds) safe(() => noise(.5, 2300, .12, .7)); },
+  crack(){ if (CONFIG.sounds) safe(() => { const c = ac(); if (!c) return; noise(.2, 800, .22, 1.2); tone(220, c.currentTime, .22, .08, "triangle"); }); },
+  tick(){ if (CONFIG.sounds) safe(() => { const c = ac(); if (c) tone(1250, c.currentTime, .1, .025); }); },
+  key(){ if (CONFIG.sounds) safe(() => { const c = ac(); if (!c) return; const t = c.currentTime; tone(520, t, .08, .06, "square"); tone(390, t + .12, .1, .06, "square"); }); },
+  box(){ if (CONFIG.sounds) safe(() => { noise(.55, 420, .1, 2); }); },
+  mask(){ if (CONFIG.sounds) safe(() => noise(.3, 1700, .1, .9)); },
+  step(){ if (CONFIG.sounds) safe(() => { const c = ac(); if (c) tone(160, c.currentTime, .15, .05, "triangle"); }); }
+};
+
+/* ---------- музика: свій файл або тихий вбудований вальс ---------- */
+const PROG = [
+  { b:45, c:[57,60,64], m:[76,72,76] }, { b:40, c:[56,59,64], m:[76,71,68] }, { b:45, c:[57,60,64], m:[72,76,81] }, { b:50, c:[57,62,65], m:[77,74,69] },
+  { b:41, c:[57,60,65], m:[77,81,77] }, { b:40, c:[56,59,64], m:[71,76,80] }, { b:45, c:[57,60,64], m:[81,76,72] }, { b:40, c:[56,59,64], m:[76,71,68] }
+];
+const Music = {
+  on:false, el:null, timer:null, next:0, bar:0, master:null,
+  start(){
+    this.on = true;
+    if (CONFIG.musicFile){
+      try {
+        const a = this.el || (this.el = new Audio(CONFIG.musicFile)); a.loop = true; a.volume = .55;
+        a.onerror = () => { this.el = null; CONFIG.musicFile = ""; if (this.on) this.synth(); };
+        const p = a.play(); if (p && p.catch) p.catch(() => {});
+      } catch (e) { CONFIG.musicFile = ""; this.synth(); }
+    } else this.synth();
+  },
+  synth(){
+    const c = ac(); if (!c || this.timer) return;
+    if (!this.master){
+      this.master = c.createGain(); this.master.gain.value = .6; const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2300;
+      const d = c.createDelay(); d.delayTime.value = .36; const fb = c.createGain(); fb.gain.value = .32;
+      this.master.connect(lp); lp.connect(c.destination); lp.connect(d); d.connect(fb); fb.connect(d); d.connect(c.destination);
+    }
+    this.next = c.currentTime + .1; this.timer = setInterval(() => this.sched(), 120); this.sched();
+  },
+  stop(){ this.on = false; if (this.el) safe(() => this.el.pause()); clearInterval(this.timer); this.timer = null; },
+  sched(){ const c = actx; if (!c || !this.on) return; const b = 60/76; while (this.next < c.currentTime + .6){ this.playBar(this.next, b); this.next += b*3; this.bar = (this.bar + 1) % PROG.length; } },
+  playBar(t, b){ const p = PROG[this.bar]; this.note(p.b, t, b*1.4, .17, "triangle"); [1,2].forEach(i => p.c.forEach(n => this.note(n, t + b*i, b*.9, .04))); p.m.forEach((n,i) => this.note(n, t + b*i, b*.95, .085)); },
+  note(m, t, d, v, type = "sine"){ const c = actx, o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.value = 440 * Math.pow(2, (m-69)/12);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(this.master); o.start(t); o.stop(t + d + .05); }
+};
+function setMusic(on){ if (on) { ac(); Music.start(); } else Music.stop(); $("mus").textContent = on ? "🎵" : "🔇"; $("mus").setAttribute("aria-pressed", on ? "true" : "false"); }
+$("mus").onclick = () => setMusic(!Music.on);
+if (!CONFIG.music) $("mus").style.display = "none";
+
+/* ---------- ефекти ---------- */
+function sparkAt(x, y, n = 8){
+  for (let i = 0; i < n; i++){
+    const d = document.createElement("i"); d.className = "sp"; const a = Math.random()*6.28, r = 24 + Math.random()*56;
+    d.style.cssText = `left:${x}px;top:${y}px;--dx:${Math.cos(a)*r}px;--dy:${Math.sin(a)*r+10}px;--s:${3+Math.random()*4}px`; document.body.appendChild(d); setTimeout(() => d.remove(), 950);
+  }
+}
+addEventListener("pointerdown", e => sparkAt(e.clientX, e.clientY, 5), true);
+function crumble(elm){
+  const r = elm.getBoundingClientRect(), cx = r.left + r.width/2, cy = r.top + r.height/2;
+  for (let i = 0; i < 26; i++){
+    const s = document.createElement("i"); s.className = "shard"; const a = i/26*6.28 + Math.random()*.4, d = 40 + Math.random()*110;
+    s.style.cssText = `left:${cx}px;top:${cy}px;--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d+50}px;--r:${Math.random()*500-250}deg;width:${4+Math.random()*10}px;height:${4+Math.random()*10}px`;
+    document.body.appendChild(s); setTimeout(() => s.remove(), 1200);
+  }
+}
+let cur = -1;
+setInterval(() => {
+  if (RM || document.hidden || ![0,5,6].includes(cur)) return; if (document.querySelectorAll(".petal").length > 22) return;
+  const p = document.createElement("i"); p.className = "petal"; p.style.left = Math.random()*100 + "vw"; p.style.setProperty("--sw", (Math.random()*100-50) + "px");
+  p.style.animationDuration = (12 + Math.random()*7) + "s"; document.body.appendChild(p); setTimeout(() => p.remove(), 19500);
+}, 1300);
+
+/* частинки на canvas: пелюстки та феєрверки */
+const conf = $("conf"), cctx = conf.getContext("2d"); let parts = [], running = false;
+function fit(){ conf.width = innerWidth; conf.height = innerHeight; } fit(); addEventListener("resize", fit);
+function petals(n = 70){
+  const cols = ["#ffffff","#f3eefa","#d9d3e8","#C8CCD8","#D7BC83","#A9A0C2"];
+  for (let i = 0; i < n; i++) parts.push({ k:"p", x:Math.random()*conf.width, y:-20 - Math.random()*conf.height*.4, vx:(Math.random()-.5)*1.6, vy:1.6 + Math.random()*2.8, g:0, life:1, dec:0,
+    r:3.5 + Math.random()*5, a:Math.random()*6.28, va:(Math.random()-.5)*.18, c:cols[i % cols.length] });
+  kick();
+}
+function firework(x, y){
+  const cols = ["#D7BC83","#C8CCD8","#fff","#A9A0C2","#e9b4c8"], n = 54;
+  for (let i = 0; i < n; i++){ const a = i/n*6.28 + Math.random()*.1, sp = 1.4 + Math.random()*3.4;
+    parts.push({ k:"f", x, y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, g:.045, life:1, dec:.012 + Math.random()*.008, r:1.6 + Math.random()*1.8, c:cols[i % cols.length] }); }
+  kick();
+}
+function kick(){ if (!running){ running = true; requestAnimationFrame(frame); } }
+function frame(){
+  cctx.clearRect(0, 0, conf.width, conf.height);
+  for (const p of parts){
+    if (p.k === "p"){ p.x += p.vx + Math.sin(p.y/40); p.y += p.vy; p.a += p.va;
+      cctx.save(); cctx.translate(p.x, p.y); cctx.rotate(p.a); cctx.fillStyle = p.c; cctx.globalAlpha = .9; cctx.beginPath(); cctx.ellipse(0, 0, p.r, p.r*.55, 0, 0, 6.28); cctx.fill(); cctx.restore(); }
+    else { p.vy += p.g; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.life -= p.dec; cctx.save(); cctx.globalCompositeOperation = "lighter"; cctx.globalAlpha = Math.max(0, p.life);
+      cctx.fillStyle = p.c; cctx.shadowColor = p.c; cctx.shadowBlur = 10; cctx.beginPath(); cctx.arc(p.x, p.y, p.r, 0, 6.28); cctx.fill(); cctx.restore(); }
+  }
+  parts = parts.filter(p => (p.k === "p" ? p.y < conf.height + 20 : p.life > 0));
+  if (parts.length) requestAnimationFrame(frame); else { running = false; cctx.clearRect(0, 0, conf.width, conf.height); }
+}
+function fireworks(n = 6){ for (let i = 0; i < n; i++) setTimeout(() => firework(innerWidth*(.15 + Math.random()*.7), innerHeight*(.12 + Math.random()*.4)), i*420*(RM ? .2 : 1)); }
+
+function notify(text){
+  const n = CONFIG.notify || {};
+  if (n.ntfyTopic) fetch("https://ntfy.sh/" + n.ntfyTopic, { method:"POST", body:text, keepalive:true }).catch(() => {});
+  if (n.emailKey) fetch("https://api.web3forms.com/submit", { method:"POST", headers:{ "content-type":"application/json", "accept":"application/json" }, body:JSON.stringify({ access_key:n.emailKey, subject:text, from_name:"Вісник сезону II", message:text }), keepalive:true }).catch(() => {});
+  if (n.url) fetch(n.url, { method:"POST", headers:{ "content-type":"application/json" }, body:JSON.stringify({ text }), keepalive:true }).catch(() => {});
+}
+
+/* ---------- декор, що будується скриптом ---------- */
+document.querySelectorAll(".stars").forEach(s => { const n = +s.dataset.n || 60; let h = ""; for (let i = 0; i < n; i++) h += `<i style="left:${Math.random()*100}%;top:${Math.random()*62}%;animation-delay:${(Math.random()*4).toFixed(2)}s;opacity:${(.4+Math.random()*.6).toFixed(2)}"></i>`; s.innerHTML = h; });
+(function books(){
+  const cols = ["#54283D","#17243A","#3b2e5a","#6a4a2a","#2a3f55","#5a3a3a","#34334f"]; let h = "";
+  for (let r = 0; r < 2; r++){ h += '<div class="shelf">'; for (let i = 0; i < 30; i++) h += `<i style="height:${52 + Math.random()*40}%;background:${cols[(Math.random()*cols.length)|0]}"></i>`; h += "</div>"; }
+  $("books").innerHTML = h;
+})();
+function chandelier(){
+  let s = '<svg viewBox="0 0 200 170" class="chd{C}"><g stroke="#C8CCD8" fill="none" stroke-width="1.6"><path d="M100 0V30"/><ellipse cx="100" cy="36" rx="20" ry="6"/><ellipse cx="100" cy="66" rx="52" ry="9"/><ellipse cx="100" cy="98" rx="84" ry="12"/></g>';
+  [[36,20,6,8],[66,52,9,12],[98,84,12,16]].forEach(([cy,rx,ry,n]) => { for (let i = 0; i < n; i++){ const a = i/n*6.28, x = 100 + rx*Math.cos(a), y = cy + ry*Math.sin(a);
+    s += `<path class="${i%3===0?"dr1":""}" style="animation-delay:${(i*.3).toFixed(1)}s" d="M${x.toFixed(1)} ${y.toFixed(1)}l3 6-3 13-3-13z" fill="#e6ecff" opacity=".88"/>`; if (cy === 98) s += `<circle cx="${x.toFixed(1)}" cy="${(y-3).toFixed(1)}" r="2.6" fill="#ffe9b0"/>`; } });
+  return s + "</svg>";
+}
+document.querySelectorAll(".chdbox").forEach(b => { b.outerHTML = chandelier().replace("{C}", "") + chandelier().replace("{C}", " sm a") + chandelier().replace("{C}", " sm b"); });
+(function guests(){
+  const g = $("guests3"); let h = ""; const xs = [18,50,84,118,158,194,232,268,304,342,376];
+  xs.forEach((x,i) => { const s = (.86 + ((i*37) % 16)/100).toFixed(2);
+    h += i % 2 === 0 ? `<g transform="translate(${x} 100) scale(${s})"><circle cx="0" cy="-60" r="6"/><path d="M-4 -53h8l2 18 17 35h-46l17-35z"/></g>`
+                     : `<g transform="translate(${x} 100) scale(${s})"><circle cx="0" cy="-62" r="6"/><path d="M-9 -55h18l2 33-3 55h-7l-1-30-1 30h-7l-3-55z"/></g>`; });
+  g.innerHTML = h;
+})();
+(function flies(){ let h = ""; for (let i = 0; i < 16; i++) h += `<i class="fly" style="left:${Math.random()*100}%;top:${40 + Math.random()*50}%;--fx:${(Math.random()*80-40).toFixed(0)}px;--fy:${(Math.random()*-70).toFixed(0)}px;animation-delay:${(Math.random()*5).toFixed(1)}s"></i>`; $("flies").innerHTML = h; })();
+
+function svgLines(t, text, max, size){
+  const words = text.split(" "), lines = []; let line = "";
+  words.forEach(w => { if ((line + " " + w).trim().length > max){ lines.push(line.trim()); line = w; } else line += " " + w; }); lines.push(line.trim());
+  t.textContent = ""; t.setAttribute("font-size", size); t.setAttribute("y", 178 - (lines.length - 1) * size * .55);
+  lines.forEach((l,i) => { const ts = document.createElementNS("http://www.w3.org/2000/svg", "tspan"); ts.setAttribute("x", 150); ts.setAttribute("dy", i ? size * 1.15 : 0); ts.textContent = l; t.appendChild(ts); });
+}
+/* конверт (SVG) для етапів 1, 3 і 6 */
+function envelope(label, withSeal){
+  return `<rect width="300" height="200" rx="7" fill="url(#gNavy)" stroke="#C8CCD8" stroke-opacity=".55"/>
+  <g class="fB"><path d="M0 0H300L150 -120Z" fill="#0d1730" stroke="#C8CCD8" stroke-opacity=".5"/><path d="M40 -4L150 -90L260 -4" fill="none" stroke="#C8CCD8" stroke-opacity=".2"/></g>
+  <rect class="lt" x="22" y="14" width="256" height="170" rx="3" fill="#F6EBDD"/><path class="lt" d="M46 52H254M46 74H230M46 96H246" stroke="#17243A" stroke-opacity=".35" stroke-width="3" stroke-linecap="round"/>
+  <path d="M0 200V56L150 132L300 56V200Z" fill="url(#gNavy2)" stroke="#C8CCD8" stroke-opacity=".5"/>
+  <path d="M12 192L150 116L288 192" fill="none" stroke="#C8CCD8" stroke-opacity=".28"/>
+  <rect x="7" y="7" width="286" height="186" rx="5" fill="none" stroke="#C8CCD8" stroke-opacity=".25" stroke-dasharray="3 5"/>
+  ${label ? `<text x="150" y="178" text-anchor="middle" font-family="Marck Script, cursive" font-size="${label.length > 40 ? 12.5 : 19}" fill="#C8CCD8" id="LBL"></text>` : ""}
+  <g class="fF"><path d="M0 0H300L150 124Z" fill="url(#gNavy3)" stroke="#C8CCD8" stroke-opacity=".6"/><path d="M26 6L150 104L274 6" fill="none" stroke="#C8CCD8" stroke-opacity=".22"/></g>
+  ${withSeal === "mini" ? `<g class="sl"><circle cx="150" cy="124" r="22" fill="url(#gSilver)"/><circle cx="150" cy="124" r="16" fill="none" stroke="#6c7285" stroke-opacity=".55" stroke-width="2"/><text x="150" y="133" text-anchor="middle" font-size="24" fill="#4a5170">☾</text></g>` : ""}`;
+}
+$("envsvg").innerHTML = envelope(true);   $("miniSvg").innerHTML = envelope(false, "mini");   $("env5svg").innerHTML = envelope(true);
+safe(() => { $("envsvg").querySelector("#LBL").removeAttribute("id"); });
+document.querySelectorAll("#envsvg text, #env5svg text").forEach(t => t.removeAttribute("id"));
+
+/* ---------- ТЕКСТИ з CONFIG ---------- */
+document.title = CONFIG.title;
+txt("t0", CONFIG.title); txt("t0s", CONFIG.subtitle); txt("s0h", CONFIG.s1.heading); txt("s0c", CONFIG.s1.caption); txt("s0hint", CONFIG.s1.hint); txt("start", CONFIG.s1.button);
+$("envsvg").querySelector("text").textContent = CONFIG.s1.onEnvelope;
+txt("dTitle", CONFIG.s2.title); txt("dSub", CONFIG.s2.subtitle); txt("dHl", CONFIG.s2.headline); txt("nbK", CONFIG.s2.nameKicker); txt("nbN", CONFIG.name); txt("n1", CONFIG.s2.button);
+txt("s2h", CONFIG.s3.heading); txt("s2s", CONFIG.s3.subtitle); txt("lKey", CONFIG.s3.objects.key); txt("lLet", CONFIG.s3.objects.letter); txt("lBox", CONFIG.s3.objects.box); txt("n2", CONFIG.s3.button); txt("s2f", CONFIG.s3.finale);
+txt("s3h", CONFIG.s4.heading); txt("s3t", CONFIG.s4.text); txt("s3hint", CONFIG.s4.hint); txt("s3x", CONFIG.s4.exit); txt("n3", CONFIG.s4.button);
+txt("s4h", CONFIG.s5.heading); txt("s4t", CONFIG.s5.text); txt("dend", CONFIG.s5.ending); txt("n4", CONFIG.s5.button);
+txt("s5k", CONFIG.s6.kicker); txt("s5hint", CONFIG.s6.hint); txt("n5", CONFIG.s6.button);
+svgLines($("env5svg").querySelector("text"), T(CONFIG.s6.onEnvelope), 26, 13.5);
+txt("s6h", CONFIG.s7.heading); txt("s6t1", CONFIG.s7.text1); txt("s6t2", CONFIG.s7.text2); txt("s6q", CONFIG.s7.question); txt("s6e", CONFIG.s7.signoff); txt("restart", CONFIG.s7.restart); txt("openchat", CONFIG.s7.openChat);
+
+/* ---------- перемикання сцен ---------- */
+const SC = ["s0","s1","s2","s3","s4","s5","s6"]; let busy = false;
+async function go(n){
+  if (busy) return; busy = true; const f = $("fade");
+  if (cur >= 0){ f.style.opacity = 1; $(SC[cur]).classList.add("out"); await sleep(RM ? 40 : 1000); }
+  SC.forEach(id => { $(id).classList.remove("on", "out"); }); cur = n; const s = $(SC[n]); s.classList.add("on"); s.querySelector(".sc").scrollTop = 0;
+  [...$("prog").children].forEach((d,i) => d.classList.toggle("on", i <= n));
+  f.style.opacity = 0; busy = false; const h = ENTER[SC[n]]; if (h) h();
+}
+const ENTER = { s1: runDoc, s6: runFinal };
+
+/* ---------- ЕТАП 1: печатка й лист ---------- */
+const seal = $("seal"); let holdAt = null, raf = 0, sealed = false;
+function holdLoop(t){ if (holdAt === null) return; const p = Math.min(1, (t - holdAt)/1500); seal.style.setProperty("--p", p.toFixed(3)); if (p >= 1) return openLetter(); raf = requestAnimationFrame(holdLoop); }
+seal.addEventListener("pointerdown", e => { if (sealed) return; e.preventDefault(); ac(); seal.setPointerCapture(e.pointerId); holdAt = performance.now(); raf = requestAnimationFrame(holdLoop); });
+["pointerup","pointercancel"].forEach(ev => seal.addEventListener(ev, () => { if (sealed) return; holdAt = null; cancelAnimationFrame(raf); seal.style.setProperty("--p", 0); }));
+seal.addEventListener("contextmenu", e => e.preventDefault());
+async function typeInto(p, text, ms){
+  const tn = document.createTextNode(""); p.appendChild(tn); p.classList.add("caret");
+  for (const ch of text){ tn.nodeValue += ch; await wait(ms); } p.classList.remove("caret");
+}
+async function openLetter(){
+  sealed = true; holdAt = null; vib([30,20,70]); sfx.crack(); crumble(seal); $("env").classList.add("broken"); notify("Вона зламала срібну печатку й відкрила лист 🌙");
+  await sleep(500); $("env").classList.add("open"); sfx.paper();
+  await sleep(2200); petals(46); sfx.bell();
+  [$("t0"), $("t0s"), $("s0h"), $("s0c"), $("s0hint")].forEach(e => { e.style.transition = "opacity .8s"; e.style.opacity = 0; });
+  $("env").classList.add("gone"); await sleep(850); $("env").style.display = "none"; [$("t0"), $("t0s"), $("s0h"), $("s0c"), $("s0hint")].forEach(e => e.style.display = "none");
+  const lp = $("lp0"); lp.classList.add("show"); sfx.paper(); await sleep(1500);
+  const box = $("lp0t");
+  for (const t of CONFIG.s1.letter){ const p = el("p"); box.appendChild(p); await typeInto(p, T(t), 24); await wait(380); }
+  const sg = el("p", "sg"); box.appendChild(sg); await typeInto(sg, T(CONFIG.s1.sign), 30);
+  await wait(500); const ps = el("p", "ps"); box.appendChild(ps); await typeInto(ps, T(CONFIG.s1.postscript), 14);
+  await wait(500); const b = $("start"); b.style.display = ""; b.classList.add("enter"); sfx.bell(); smoothEnd(b);
+}
+$("start").onclick = () => go(1);
+
+/* ---------- ЕТАП 2: архівна хроніка ---------- */
+(function buildDoc(){
+  const b = $("dBody"); CONFIG.s2.paragraphs.forEach((t,i) => {
+    b.appendChild(Object.assign(el("p", "ln", t), { }));
+    CONFIG.s2.notes.filter(n => n.after === i).forEach(n => b.appendChild(el("div", "note ln", n.text)));
+  });
+})();
+let docRan = false;
+async function runDoc(){
+  if (docRan) return; docRan = true; await wait(1100);
+  for (const e of document.querySelectorAll("#dBody .ln")){ await wait(e.classList.contains("note") ? 900 : 1500); reveal(e); sfx.tick(); smooth(e); }
+  await wait(1500); const nb = $("nameBox"); reveal(nb); sfx.bell(); const r = nb.getBoundingClientRect(); sparkAt(r.left + r.width*.7, r.top + r.height/2, 26); smooth(nb);
+  await wait(1700); const b = $("n1"); b.style.visibility = "visible"; b.classList.add("enter"); smoothEnd(b);
+}
+$("n1").onclick = () => go(2);
+
+/* ---------- ЕТАП 3: три підказки ---------- */
+let found = 0; const clues = CONFIG.s3.clues;
+const upd = () => { $("s2c").textContent = `${CONFIG.s3.countLabel} ${found} / ${clues.length}`; }; upd();
+function discover(btn, sound){
+  if (btn.classList.contains("open")) return; ac(); btn.classList.add("open"); sound(); vib(25);
+  const c = clues[found]; const card = el("div", "clue"); card.appendChild(el("h3", null, c.t)); card.appendChild(el("p", null, c.m)); $("clues").appendChild(card);
+  const r = btn.getBoundingClientRect(); sparkAt(r.left + r.width/2, r.top + r.height/2, 16); found++; upd(); notify(`Вона відкрила підказку ${found}/${clues.length} 🔍`); setTimeout(() => smooth(card), 500);
+  if (found === clues.length) setTimeout(async () => { const f = $("s2f"); f.style.display = ""; f.classList.add("enter"); sfx.bell(); petals(30); await sleep(900); const n = $("n2"); n.style.display = ""; n.classList.add("enter"); smoothEnd(n); }, 1500);
+}
+$("oKey").onclick = () => discover($("oKey"), sfx.key); $("oLet").onclick = () => discover($("oLet"), sfx.paper); $("oBox").onclick = () => discover($("oBox"), sfx.box);
+$("n2").onclick = () => go(3);
+
+/* ---------- ЕТАП 4: бал маскарадів ---------- */
+const maskSVG = c => {
+  const g = c === "gold" ? ["#f6e6b4","#d7bc83","#8a6f33"] : c === "silver" ? ["#fafbff","#C8CCD8","#7b8196"] : ["#8a3c5f","#54283D","#2c1020"];
+  const id = "mg" + c;
+  return `<svg viewBox="0 0 130 90"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${g[0]}"/><stop offset=".55" stop-color="${g[1]}"/><stop offset="1" stop-color="${g[2]}"/></linearGradient></defs>
+  <path d="M6 44Q10 12 42 20Q65 6 88 20Q120 12 124 44Q120 68 92 66Q76 66 65 50Q54 66 38 66Q10 68 6 44Z" fill="url(#${id})" stroke="rgba(0,0,0,.35)" stroke-width="1.2"/>
+  <path d="M24 42Q38 28 56 44Q44 56 30 54Z M106 42Q92 28 74 44Q86 56 100 54Z" fill="#0b1020"/>
+  <path d="M14 36Q34 18 60 30M116 36Q96 18 70 30" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M65 22Q60 30 65 38Q70 30 65 22Z" fill="${g[0]}" stroke="rgba(0,0,0,.3)"/><circle cx="65" cy="14" r="4" fill="${g[0]}"/><circle cx="20" cy="30" r="3" fill="#fff" opacity=".8"/><circle cx="110" cy="30" r="3" fill="#fff" opacity=".8"/>
+  <path d="M120 40Q146 20 140 -2Q128 10 118 30M10 40Q-16 20 -10 -2Q2 10 12 30" fill="none" stroke="${g[1]}" stroke-width="3" stroke-linecap="round" opacity=".9"/></svg>`;
+};
+CONFIG.s4.masks.forEach(m => {
+  const b = document.createElement("button"); b.className = "mask"; b.style.setProperty("--gl", m.c === "gold" ? "#ffd98a" : m.c === "silver" ? "#dfe8ff" : "#d96a98");
+  b.innerHTML = maskSVG(m.c); b.appendChild(el("span", "mn", m.n)); b.setAttribute("aria-label", T(m.n) + " маска");
+  b.onclick = async e => {
+    if ($("masks").classList.contains("done")) return; $("masks").classList.add("done"); ac(); sfx.mask(); vib(30); notify("Вона обрала маску: " + m.n + " 🎭");
+    b.classList.add("sel"); document.querySelectorAll(".mask").forEach(o => { if (o !== b) o.classList.add("dim"); }); sparkAt(e.clientX, e.clientY, 24); petals(36);
+    await wait(1100); const pr = $("pred"); pr.innerHTML = ""; pr.appendChild(el("h3", null, m.t)); pr.appendChild(el("p", null, m.m)); pr.style.display = "block"; pr.classList.add("enter"); sfx.bell(); smooth(pr);
+    await wait(1500); const x = $("s3x"); x.style.display = ""; x.classList.add("enter"); smoothEnd(x);
+    await wait(1200); const n = $("n3"); n.style.display = ""; n.classList.add("enter"); smoothEnd(n);
+  };
+  $("masks").appendChild(b);
+});
+$("n3").onclick = () => go(4);
+
+/* ---------- ЕТАП 5: таємний танець ---------- */
+CONFIG.s5.dances.forEach(d => {
+  const b = document.createElement("button"); b.className = "pr"; b.appendChild(el("span", "rm", d.r)); const w = document.createElement("div"); w.appendChild(el("h3", null, d.t)); w.appendChild(el("p", null, d.s)); b.appendChild(w);
+  b.onclick = async () => {
+    if ($("progs").classList.contains("gone")) return; ac(); vib(30); sfx.bell(); notify("Вона обрала танець: " + d.t + " 💃"); $("progs").classList.add("gone");
+    await sleep(RM ? 40 : 900); $("progs").style.display = "none"; const st = $("stage"); st.style.display = "flex"; st.classList.add("enter"); $("dancers").setAttribute("class", "dancers " + d.k);
+    $("dname").textContent = T(d.t.charAt(0) + d.t.slice(1).toLowerCase()); $("dmsg").textContent = T(d.m); smooth(st); danceFx(st);
+    await wait(2600); const e = $("dend"); e.style.display = ""; e.classList.add("enter"); sfx.bell(); smooth(e);
+    await wait(1700); const n = $("n4"); n.style.display = ""; n.classList.add("enter"); smoothEnd(n);
+  };
+  $("progs").appendChild(b);
+});
+function danceFx(st){
+  if (RM) return; for (let i = 0; i < 16; i++){ const r = document.createElement("i"); r.className = "rise"; r.style.left = (14 + Math.random()*72) + "%"; r.style.setProperty("--rx", (Math.random()*60-30) + "px"); r.style.animationDelay = (Math.random()*5).toFixed(1) + "s"; st.appendChild(r); }
+  const drop = () => { if (!st.isConnected || cur !== 4) return; const p = document.createElement("i"); p.className = "fp"; p.style.left = Math.random()*92 + "%"; const h = st.clientHeight;
+    p.style.setProperty("--fx", (Math.random()*60-30) + "px"); p.style.setProperty("--fy", (h*.8 + Math.random()*h*.12) + "px"); p.style.setProperty("--fr", (Math.random()*540) + "deg"); st.appendChild(p); if (st.querySelectorAll(".fp").length > 40) st.querySelector(".fp").remove(); };
+  for (let i = 0; i < 14; i++) setTimeout(drop, i*260); const iv = setInterval(() => { if (cur !== 4) return clearInterval(iv); drop(); }, 700); sfx.step();
+}
+$("n4").onclick = () => go(5);
+
+/* ---------- ЕТАП 6: останній конверт ---------- */
+let env5Open = false;
+async function openEnv5(){
+  if (env5Open) return; env5Open = true; ac(); vib([25,20,50]); sfx.paper(); notify("Вона відкрила останній конверт 🌹"); const e = $("env5"); e.classList.add("open"); e.querySelector(".glowp").style.display = "none";
+  [$("s5hint"), $("s5k")].forEach(x => { x.style.transition = "opacity .7s"; x.style.opacity = 0; });
+  await sleep(2300); petals(40); sfx.bell(); e.classList.add("gone"); await sleep(850); e.style.display = "none"; $("s5hint").style.display = "none"; $("s5k").style.display = "none";
+  const lp = $("lp5"); lp.classList.add("show"); sfx.paper(); await sleep(1500); smooth(lp);
+  const box = $("lp5t");
+  for (const t of CONFIG.s6.letter){ const p = el("p"); p.style.opacity = 0; p.style.transition = "opacity 1.2s"; p.textContent = T(t); box.appendChild(p); await wait(250); p.style.opacity = 1; sfx.tick(); smooth(p); await wait(2100); }
+  const sg = el("p", "sg2", CONFIG.s6.sign); sg.style.opacity = 0; sg.style.transition = "opacity 1.4s"; box.appendChild(sg); await wait(250); sg.style.opacity = 1; sfx.bell(); smooth(sg);
+  await wait(1700); const b = $("n5"); b.style.display = ""; b.classList.add("enter"); smoothEnd(b);
+}
+$("env5").onclick = openEnv5; $("env5").onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openEnv5(); } };
+$("n5").onclick = () => go(6);
+
+/* ---------- ЕТАП 7: фінал ---------- */
+function chatLink(text){
+  const t = encodeURIComponent(text);
+  if (CONFIG.telegram) return `https://t.me/${String(CONFIG.telegram).replace(/^@/, "")}?text=${t}`;
+  if (CONFIG.whatsapp) return `https://wa.me/${String(CONFIG.whatsapp).replace(/\D/g, "")}?text=${t}`;
+  return "";
+}
+let finalRan = false;
+function runFinal(){ if (finalRan) return; finalRan = true; petals(50); setTimeout(() => fireworks(2), 800); }
+CONFIG.s7.options.forEach(o => {
+  const b = document.createElement("button"); b.className = "opt"; b.style.setProperty("--c", o.c); b.textContent = T(o.b);
+  b.onclick = async () => {
+    if ($("opts").classList.contains("done")) return; $("opts").classList.add("done"); ac(); vib([30,20,60]); sfx.bell();
+    document.querySelectorAll(".opt").forEach(x => { x.style.transition = "opacity .8s"; if (x !== b) x.style.opacity = .22; x.style.pointerEvents = "none"; });
+    fireworks(7); petals(70); notify("Її відповідь: " + o.b);
+    await wait(900); const link = chatLink(T(o.b)); const ans = $("ans"); $("ans1").textContent = T(link ? o.a : o.a); $("ans2").textContent = "— " + T(CONFIG.author); ans.classList.add("show"); smooth(ans);
+    if (!link){ $("ans1").textContent = T(o.a) + " " + T(CONFIG.s7.thanks); }
+    await wait(1800); const oc = $("openchat"); if (link){ oc.href = link; oc.style.display = "inline-block"; oc.classList.add("enter"); setTimeout(() => { location.href = link; }, 1800 * (RM ? .2 : 1)); }
+    await wait(1200); const e = $("s6e"); e.style.display = ""; e.classList.add("enter"); const r = $("restart"); r.style.display = ""; r.classList.add("enter"); smoothEnd(r);
+  };
+  $("opts").appendChild(b);
+});
+$("restart").onclick = () => location.reload();
+
+/* ---------- старт ---------- */
+(function init(){ SC.forEach(id => $(id).classList.remove("on")); cur = 0; $("s0").classList.add("on"); $("prog").children[0].classList.add("on"); })();
+</script>
+</body>
+</html>
